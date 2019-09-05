@@ -1,11 +1,14 @@
 const Sequelize = require('sequelize');
-const connection = require('../persistencia/connectionFactory');
 
-const Pagamentos = connection.define('Pagamentos', {
-  formaDePagamento: { type: Sequelize.STRING },
-  valor: { type: Sequelize.INTEGER },
-  moeda: { type: Sequelize.STRING },
-  descricao: { type: Sequelize.STRING }
-});
+module.exports = (connection) => {
+  const Pagamentos = connection.define('Pagamentos', {
+    formaDePagamento: { type: Sequelize.STRING },
+    moeda: { type: Sequelize.STRING },
+    valor: { type: Sequelize.INTEGER },
+    status: { type: Sequelize.STRING },
+    data: { type: Sequelize.DATE },
+    descricao: { type: Sequelize.STRING },
+  });
 
-module.exports = Pagamentos
+  return Pagamentos;
+} 
