@@ -20,4 +20,18 @@ module.exports = (routes) => {
       console.error('ERROR: ', error);
     }
   });
+
+  routes.put('/pagamentos/pagamento/:id', async (req,res) => {
+    try{
+      const id = req.params.id;
+      const pagamentoData = req.body;
+
+      pagamentoData.data = new Date();
+
+      await pagamentosDao.updatePagamento(pagamentoData, id);
+      res.status(200).json({ status: 'Pagamento atualizado' });
+    }catch(error){
+      console.error('ERROR: ', error);
+    }
+  });
 }
