@@ -3,13 +3,23 @@ const PagamentosDao = require('../components/Pagamentos/PagamentosDao');
 const pagamentosDao = new PagamentosDao();
 
 module.exports = (routes) => {
-  routes.get('/pagamentos', (req,res) => res.json({ teste: 'ok' }));
+  routes.get('/pagamentos', async (req,res) => {
+    try{
+      console.log('Processando uma requisicao: Retornar todos pagamentos');
+      const pagamentos = await pagamentosDao.getPagamentos();
+
+      res.status(200).json(pagamentos);
+    }catch(error){
+      console.error('ERROR: ', error);
+    }
+  });
 
   routes.post('/pagamentos/pagamento', async (req, res) => {
     try{
-      const pagamento = req.body;
       console.log('Processando uma requisicao: Cadastrar novo pagamento');
+      const pagamento = req.body;
   
+      pagamento.status = "CRIADO";
       pagamento.data = new Date();
       
       await pagamentosDao.setPagamento(pagamento);
@@ -21,15 +31,30 @@ module.exports = (routes) => {
     }
   });
 
+  routes.get('/pagamentos/pagamento/:id', async (req, res) => {
+    try{
+      console.log('Processando uma requisicao: Retornando pagamento especifico');
+      const { id } = req.params;
+
+      const pagamento = await pagamentosDao.getPagamento(id);
+      res.status(200).json(pagamento);
+    }catch(error){
+      console.error('ERROR: ', error);
+    }
+  });
+
   routes.put('/pagamentos/pagamento/:id', async (req,res) => {
     try{
-      const id = req.params.id;
+      console.log('Processando uma requisicao: Atualizar pagamento');
+      const { id } = req.params;
       const pagamentoData = req.body;
 
+      pagamentoData.status = "ATUALIZADO";
       pagamentoData.data = new Date();
 
       await pagamentosDao.updatePagamento(pagamentoData, id);
-      res.status(200).json({ status: 'Pagamento atualizado' });
+      const pagamento = await pagamentosDao.getPagamento(id);
+      res.status(200).json({ status: 'Pagamento atualizado', pagamento });
     }catch(error){
       console.error('ERROR: ', error);
     }
