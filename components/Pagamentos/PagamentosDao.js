@@ -21,4 +21,8 @@ module.exports = class PagamentosDao{
     const pagamento =  await pagamentos.update(pagamentoData, { where: { id: pagamentoId } });
     return pagamento
   }
+
+  async removePagamento(pagamentoId){
+    await pagamentos.destroy({ where: { id: pagamentoId } });
+  }
 }

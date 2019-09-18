@@ -59,4 +59,17 @@ module.exports = (routes) => {
       console.error('ERROR: ', error);
     }
   });
+
+  routes.delete('/pagamentos/pagamento/:id', async (req, res) => {
+    try{
+      console.log('Processando uma requisicao: Remover pagamento');
+      const { id } = req.params;
+
+      await pagamentosDao.removePagamento(id);
+      const pagamento = await pagamentosDao.getPagamentos();
+      res.status(200).json({ status: 'Pagamento removido', pagamento });
+    }catch(error){
+      console.error('ERROR: ', error);
+    }
+  })
 }
