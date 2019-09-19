@@ -1,14 +1,25 @@
+const redis = require('redis');
 const PagamentosDao = require('../components/Pagamentos/PagamentosDao');
 
+const cache = redis.createClient();
 const pagamentosDao = new PagamentosDao();
 
 module.exports = (routes) => {
   routes.get('/pagamentos', async (req,res) => {
     try{
-      console.log('Processando uma requisicao: Retornar todos pagamentos');
-      const pagamentos = await pagamentosDao.getPagamentos();
-
-      res.status(200).json(pagamentos);
+      //cache.del("pagamentos");
+      cache.get("pagamentos", async (error,reply) => {
+        if(reply){
+          console.log('Processando uma requisicao: Retornar todos pagamentos em cache');
+          res.status(200).json(JSON.parse(reply));
+        }else{
+          console.log('Processando uma requisicao: Retornar todos pagamentos na base');
+          const pagamentos = await pagamentosDao.getPagamentos();
+          cache.set("pagamentos", JSON.stringify(pagamentos));
+          cache.expire("pagamentos", 10);
+          res.status(200).json(pagamentos);
+        }
+      });
     }catch(error){
       console.error('ERROR: ', error);
     }
@@ -23,7 +34,15 @@ module.exports = (routes) => {
       pagamento.data = new Date();
       
       await pagamentosDao.setPagamento(pagamento);
-  
+
+      cache.get("pagamentos", async (error, reply) => {
+        const testee = JSON.parse(reply);
+        const teste = { ...testee, ...pagamento,  }
+        const carai = JSON.stringify(teste);
+        cache.set("pagamentos", carai);
+        cache.get("pagamentos", async(error, reply) => console.log('NOVO: ', reply));
+      });
+      
       console.log('Status: Pagamento cadastrado');
       res.status(200).json({ status: 'Pagamento cadastrado' });
     }catch(error){
