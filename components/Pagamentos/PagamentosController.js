@@ -1,11 +1,11 @@
 const redis = require('redis');
-const PagamentosDao = require('../components/Pagamentos/PagamentosDao');
+const PagamentosService = require('../Pagamentos/PagamentosService');
 
 const cache = redis.createClient();
-const pagamentosDao = new PagamentosDao();
+const pagamentosService = new PagamentosService();
 
-module.exports = (routes) => {
-  routes.get('/pagamentos', async (req,res) => {
+module.exports = class PagamentosController {
+  static async getPagamentos(req,res){
     try{
       //cache.del("pagamentos");
       cache.get("pagamentos", async (error,reply) => {
@@ -14,7 +14,7 @@ module.exports = (routes) => {
           res.status(200).json(JSON.parse(reply));
         }else{
           console.log('Processando uma requisicao: Retornar todos pagamentos na base');
-          const pagamentos = await pagamentosDao.getPagamentos();
+          const pagamentos = await pagamentosService.getPagamentos();
           cache.set("pagamentos", JSON.stringify(pagamentos));
           cache.expire("pagamentos", 10);
           res.status(200).json(pagamentos);
@@ -23,9 +23,9 @@ module.exports = (routes) => {
     }catch(error){
       console.error('ERROR: ', error);
     }
-  });
+  };
 
-  routes.post('/pagamentos/pagamento', async (req, res) => {
+  static async setPagamentos(req, res){
     try{
       console.log('Processando uma requisicao: Cadastrar novo pagamento');
       const pagamento = req.body;
@@ -33,8 +33,8 @@ module.exports = (routes) => {
       pagamento.status = "CRIADO";
       pagamento.data = new Date();
       
-      await pagamentosDao.setPagamento(pagamento);
-
+      await pagamentosService.setPagamento(pagamento);
+  
       cache.get("pagamentos", async (error, reply) => {
         const testee = JSON.parse(reply);
         const teste = { ...testee, ...pagamento,  }
@@ -48,47 +48,47 @@ module.exports = (routes) => {
     }catch(error){
       console.error('ERROR: ', error);
     }
-  });
+  };
 
-  routes.get('/pagamentos/pagamento/:id', async (req, res) => {
+  static async getPagamento(req, res){
     try{
       console.log('Processando uma requisicao: Retornando pagamento especifico');
       const { id } = req.params;
-
-      const pagamento = await pagamentosDao.getPagamento(id);
+  
+      const pagamento = await pagamentosService.getPagamento(id);
       res.status(200).json(pagamento);
     }catch(error){
       console.error('ERROR: ', error);
     }
-  });
+  };
 
-  routes.put('/pagamentos/pagamento/:id', async (req,res) => {
+  static async updatePagamento(req, res){
     try{
       console.log('Processando uma requisicao: Atualizar pagamento');
       const { id } = req.params;
       const pagamentoData = req.body;
-
+  
       pagamentoData.status = "ATUALIZADO";
       pagamentoData.data = new Date();
-
-      await pagamentosDao.updatePagamento(pagamentoData, id);
-      const pagamento = await pagamentosDao.getPagamento(id);
+  
+      await pagamentosService.updatePagamento(pagamentoData, id);
+      const pagamento = await pagamentosService.getPagamento(id);
       res.status(200).json({ status: 'Pagamento atualizado', pagamento });
     }catch(error){
       console.error('ERROR: ', error);
     }
-  });
+  };
 
-  routes.delete('/pagamentos/pagamento/:id', async (req, res) => {
+  static async removePagamento(req, res){
     try{
       console.log('Processando uma requisicao: Remover pagamento');
       const { id } = req.params;
-
-      await pagamentosDao.removePagamento(id);
-      const pagamento = await pagamentosDao.getPagamentos();
+  
+      await pagamentosService.removePagamento(id);
+      const pagamento = await pagamentosService.getPagamentos();
       res.status(200).json({ status: 'Pagamento removido', pagamento });
     }catch(error){
       console.error('ERROR: ', error);
     }
-  })
+  };
 }

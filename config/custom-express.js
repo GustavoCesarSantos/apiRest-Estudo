@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const routesPagamentos = require('../routes/Pagamentos');
-const routesImagens = require('../routes/Imagens');
+const routesPagamentos = require('../routes/Pagamentos/Pagamentos');
+const routesImagens = require('../routes/Imagens/Imagens');
 
 const app = express();
 app.use(bodyParser.json());
