@@ -18,7 +18,7 @@ module.exports = class PagamentosDao{
   }
 
   async updatePagamento(pagamentoData, pagamentoId){
-    const pagamento =  await pagamentos.update(pagamentoData, { where: { id: pagamentoId } });
+    const pagamento = await pagamentos.update(pagamentoData, { where: { id: pagamentoId } });
     return pagamento
   }
 
