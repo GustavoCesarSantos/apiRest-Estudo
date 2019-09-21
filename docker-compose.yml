@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  mysqlsrv:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: "1234!"
+      MYSQL_DATABASE: "payfast"
+    ports:
+      - 3306:3306
+    volumes:
+      - ../mysql:/var/lib/mysql
+    networks: 
+      - mysql-compose-network
+  
+  adminer:
+    image: adminer
+    ports:
+      - 8083:8080
+    networks: 
+      - mysql-compose-network
+
+  redis:
+    image: redis
+    # command: redis-server --requirepass 1234!
+    ports:
+      - 6379:6379
+    networks: 
+      - mysql-compose-network
+
+networks: 
+  mysql-compose-network:
+    driver: bridge
